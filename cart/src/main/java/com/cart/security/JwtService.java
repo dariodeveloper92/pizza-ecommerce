@@ -1,4 +1,4 @@
-package com.ecommerce.product.security;
+package com.cart.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
