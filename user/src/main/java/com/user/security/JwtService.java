@@ -18,12 +18,11 @@ public class JwtService {
     private final long expirationTime;
 
     public JwtService(
-            @Value("${jwt.secret}") String secret, //token impostato manualmente in application
+            @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration}") long expirationTime
     ) {
-        // Decodifica Base64 → chiave valida per HS256
-        byte[] decodedKey = Base64.getDecoder().decode(secret);
-        this.secretKey = Keys.hmacShaKeyFor(decodedKey);
+        // USA I BYTES DIRETTI
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
         this.expirationTime = expirationTime;
     }
 

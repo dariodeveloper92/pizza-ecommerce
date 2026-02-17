@@ -20,8 +20,7 @@ public class JwtAuthenticationFilter implements WebFilter {
     private final SecretKey secretKey;
 
     public JwtAuthenticationFilter(@Value("${jwt.secret}") String secret) {
-        byte[] decodedKey = Base64.getDecoder().decode(secret);
-        this.secretKey = Keys.hmacShaKeyFor(decodedKey);
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     @Override
@@ -44,14 +43,18 @@ public class JwtAuthenticationFilter implements WebFilter {
         String token = authHeader.substring(7);
 
         try {
+            System.out.println("Gateway: Verifico token per il path: " + path);
+
             Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token);
 
+            System.out.println("Gateway: Token VALIDATO con successo!");
             return chain.filter(exchange);
 
         } catch (Exception e) {
+            System.err.println("Gateway: Errore validazione token! Motivo: " + e.getMessage());
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
