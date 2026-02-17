@@ -37,6 +37,18 @@ services:
     networks:
       - pizza-net
 
+  # --- DATABASE: NOTIFICATION SERVICE ---
+  db-notification:
+    image: mysql:8.0
+    container_name: mysql-notification
+    environment:
+      MYSQL_DATABASE: pizza_notification_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3310:3306" # Usiamo la porta 3310
+    networks:
+      - pizza-net
+
   # --- KAFKA INFRASTRUCTURE ---
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
