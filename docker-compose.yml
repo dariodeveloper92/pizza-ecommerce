@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # --- DATABASE: USER SERVICE ---
+  db-user:
+    image: mysql:8.0
+    container_name: mysql-user
+    environment:
+      MYSQL_DATABASE: pizza_user_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3309:3306"
+    networks:
+      - pizza-net
+
+  # --- DATABASE: PRODUCT SERVICE ---
+  db-product:
+    image: mysql:8.0
+    container_name: mysql-product
+    environment:
+      MYSQL_DATABASE: pizza_product_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306" # Mappato su 3307 per evitare conflitti se hai già un MySQL locale
+    networks:
+      - pizza-net
+
+  # --- DATABASE: CART SERVICE ---
+  db-cart:
+    image: mysql:8.0
+    container_name: mysql-cart
+    environment:
+      MYSQL_DATABASE: pizza_cart_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3308:3306" # Mappato su 3308
+    networks:
+      - pizza-net
+
+  # --- KAFKA INFRASTRUCTURE ---
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - pizza-net
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0 # Usiamo una versione specifica più stabile
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      # Queste due righe risolvono l'errore che hai visto
+      KAFKA_ENABLE_KRAFT: "false"
+    networks:
+      - pizza-net
+
+networks:
+  pizza-net:
+    driver: bridge

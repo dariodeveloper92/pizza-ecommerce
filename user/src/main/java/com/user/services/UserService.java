@@ -48,7 +48,7 @@ public class UserService {
         log.info("Utente salvato con successo. ID: {}", savedUser.getId());
 
         // KAFKA: Notifica gli altri microservizi
-//        userEventProducer.sendUserRegistered(savedUser.getId(), savedUser.getEmail());
+        userEventProducer.sendUserRegistered(savedUser.getId(), savedUser.getEmail());
 
         log.info("fine \n");
         return savedUser;

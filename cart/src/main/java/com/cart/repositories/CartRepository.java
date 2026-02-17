@@ -10,4 +10,6 @@ public interface CartRepository extends JpaRepository<CartItem, Long> {
 
     // Utile se vuoi svuotare il carrello dopo un ordine
     void deleteByUserEmail(String userEmail);
+
+    void deleteByProductId(Long productId);
 }

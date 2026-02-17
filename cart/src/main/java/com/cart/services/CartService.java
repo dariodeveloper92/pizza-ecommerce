@@ -19,8 +19,20 @@ public class CartService {
         return repo.findByUserEmail(email);
     }
 
-    public CartItem addToCart(CartItem item) {
-        return repo.save(item);
+    @Transactional
+    public CartItem addToCart(CartItem newItem) {
+        // 1. Cerchiamo se l'utente ha già quel prodotto nel carrello
+        List<CartItem> currentCart = repo.findByUserEmail(newItem.getUserEmail());
+
+        return currentCart.stream()
+                .filter(item -> item.getProductId().equals(newItem.getProductId()))
+                .findFirst()
+                .map(existingItem -> {
+                    // 2. Se esiste, sommiamo la quantità
+                    existingItem.setQuantity(existingItem.getQuantity() + newItem.getQuantity());
+                    return repo.save(existingItem);
+                })
+                .orElseGet(() -> repo.save(newItem)); // 3. Se non esiste, creiamo una nuova riga
     }
 
     public void deleteItem(Long id) {
