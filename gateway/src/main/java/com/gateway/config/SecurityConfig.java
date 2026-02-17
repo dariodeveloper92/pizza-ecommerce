@@ -30,7 +30,8 @@ public class SecurityConfig {
                                 "/api/ingredients/**",
                                 "/api/images/**",
                                 "/api/categories/**",
-                                "/api/variants/**"
+                                "/api/variants/**",
+                                "/api/cart/**"
                         ).permitAll()
                         .anyExchange().authenticated()
                 )
