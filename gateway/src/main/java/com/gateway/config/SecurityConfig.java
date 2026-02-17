@@ -24,7 +24,14 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(auth -> auth
-                        .pathMatchers("/api/users/login", "/api/users/register", "/api/products/**").permitAll()
+                        .pathMatchers("/api/users/login",
+                                "/api/users/register",
+                                "/api/products/**",
+                                "/api/ingredients/**",
+                                "/api/images/**",
+                                "/api/categories/**",
+                                "/api/variants/**"
+                        ).permitAll()
                         .anyExchange().authenticated()
                 )
                 .addFilterAt(jwtFilter, SecurityWebFiltersOrder.AUTHENTICATION)
