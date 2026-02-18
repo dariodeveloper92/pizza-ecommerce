@@ -7,94 +7,122 @@ Welcome to Pizza E-Commerce, a robust and scalable backend system built on a mic
 🏗️ System Architecture
 The system is designed with independent, decoupled microservices that communicate through a centralized API Gateway:
 
-API Gateway (Port 8080): The single entry point. It handles request routing and centralized JWT (JSON Web Token) validation.
+- API Gateway (Port 8080): The single entry point. It handles request routing and centralized JWT (JSON Web Token) validation.
 
-User Service (Port 8082): Manages user registration, login, and issues secure authentication tokens.
+- User Service (Port 8082): Manages user registration, login, and issues secure authentication tokens.
 
-Product Service (Port 8081): Manages the pizza catalog, including categories, ingredients, and pricing.
+- Product Service (Port 8081): Manages the pizza catalog, including categories, ingredients, and pricing.
 
-Cart Service (Port 8083): Handles real-time shopping cart management for authenticated users, utilizing identity propagation from the Gateway.
+- Cart Service (Port 8083): Handles real-time shopping cart management for authenticated users, utilizing identity propagation from the Gateway.
+
+- Notification Service (Port 8084): The auditing and communication hub. It tracks system events and maintains a persistent audit log of all notifications.
 
 --------------------------------------
 🛠️ Technology Stack
-Backend
-Java 21 & Spring Boot 3.4+
 
-Spring Cloud Gateway: For edge routing and perimeter security.
+Backend: 
+- Java 21 & Spring Boot 3.4+
 
-Spring Security: Implementation of a Stateless security model.
+Infrastructure:
 
-JSON Web Token (JWT): For secure, cross-service authentication.
+- Docker & Docker Compose: Containerization and orchestration of all supporting services.
 
-Hibernate / Spring Data JPA: For ORM and data persistence.
+- Apache Kafka: Distributed event streaming platform for asynchronous messaging.
 
-MySQL: Relational databases (dedicated instance per microservice).
+- MySQL: Relational persistence utilizing the Database-per-Service pattern.
 
-Apache Kafka: Integrated for asynchronous communication and notification systems.
+- Security: Spring Security with a Stateless JWT model and Header Propagation.
+
+- Build Tool: Maven.
 
 Frontend
-Angular: (Upcoming) A modern, reactive user interface.
+- Angular: (Upcoming) A modern, reactive user interface.
 
 --------------------------------------
-🔐 Security & Identity Flow
-The project implements an advanced Gateway Aggregation & Propagation pattern:
+🔄 Event-Driven Design (Kafka)
 
-Authentication: The client sends credentials to the User Service. Upon success, it receives an HMAC-SHA256 signed JWT.
+The project utilizes Apache Kafka to maintain eventual consistency across the distributed system without direct service coupling:
 
-Authorization: Every request to protected services (Cart, Product) must include the Authorization: Bearer <token> header.
+1. User Registration: The User Service emits a user-registered event; the Notification Service consumes it to trigger welcome workflows and audit logs.
 
-Header Propagation: The Gateway validates the token signature. If valid, it extracts the user's email and "injects" it into a custom X-User-Email header before forwarding the request to internal microservices.
-
-Identity Awareness: The Cart Service reads the X-User-Email header to identify the owner of the cart, ensuring high security without the need to re-verify the JWT signature at every internal hop.
+2. Product Management: When a product is removed, the Product Service publishes a product-deleted event.
+- The Cart Service consumes this to automatically sanitize active carts.
+- The Notification Service consumes this to alert administrators of catalog changes.
 
 --------------------------------------
-📂 Database Design
-To ensure the Database-per-Service pattern, each service owns its schema:
+📂 Infrastructure & Dockerization
+The entire infrastructure is orchestrated via Docker, ensuring a "plug-and-play" environment for developers. Each service owns its dedicated schema to prevent tight coupling:
 
-pizza_user_db: User profiles, roles, and credentials.
-
-pizza_product_db: Full product catalog (Pizzas, Ingredients, Categories).
-
-pizza_cart_db: Persistence of cart items associated with unique user emails.
+Service	Database Instance	External Port
+User	pizza_user_db	3309
+Product	pizza_product_db	3307
+Cart	pizza_cart_db	3308
+Notification	pizza_notification_db	3310
+Messaging	Kafka Broker	9092
 
 --------------------------------------
 🚀 Getting Started
-Prerequisites
-JDK 21+
 
-MySQL 8.0+
+Prerequisites:
+- Docker & Docker Desktop
+- JDK 21+
+- Maven 3.9+
 
-Maven 3.9+
+Setup & Run:
+1. Clone the repository:
+- git clone https://github.com/your-username/pizza-ecommerce.git
+2. Spin up the Infrastructure (DBs & Kafka):
 
-Apache Kafka (running for messaging features)
+From the project root, run:
+- docker-compose up -d
+
+3. Application Configuration:
+   Each microservice is pre-configured to connect to the Docker instances. Update 'application.properties' only if you wish to change local port mappings.
+- mvn clean install
+
+4. Launch Services:
+- Start the services in the following order: User, Product, Cart, Notification, and finally the Gateway.
 
 --------------------------------------
-Setup
-Clone the repository:
 
-Bash
+🔐 Identity & Security Flow
+1. Authentication: Client logs in via User Service and receives a signed JWT.
 
-git clone https://github.com/your-username/pizza-ecommerce.git
-Configure database credentials in the application.properties of each microservice.
+2. Validation: The Gateway validates the JWT signature at the perimeter.
+
+3. Propagation: The Gateway extracts user metadata and injects it into a custom X-User-Email header.
+
+4. Downstream Logic: Internal services trust the Gateway-validated header, ensuring high performance by avoiding redundant token parsing.
 
 --------------------------------------
-Build the project:
+📂 Database Design
 
-Bash
+To ensure the Database-per-Service pattern, each service owns its dedicated schema, ensuring high isolation and fault tolerance:
 
-mvn clean install
-Start the services in the following order: User, Product, Cart, and finally the Gateway.
+- pizza_user_db (Port 3309): User profiles, roles, and encrypted credentials.
+
+- pizza_product_db (Port 3307): Full product catalog (Pizzas, Ingredients, Categories).
+
+- pizza_cart_db (Port 3308): Persistence of cart items associated with unique user emails.
+
+- pizza_notification_db (Port 3310): Historical audit logs of all system notifications and events.
+
 --------------------------------------
-🛤️ Roadmap
+
+🛤️ Roadmap:
+
 [x] Microservices Architecture & API Gateway Integration
 
-[x] Centralized JWT Authentication
+[x] Centralized JWT Authentication & Identity Propagation
 
-[x] Identity Propagation for Cart Management
+[x] Asynchronous Messaging with Apache Kafka
 
-[ ] Order Service Implementation
+[x] Full Infrastructure Dockerization
 
-[ ] Kafka-based email confirmation system
+[x] Persistent Notification Audit Log
 
-[ ] Angular 17+ Frontend Development
+[ ] Order Service & Payment Integration
+
+[ ] Angular 17+ Reactive Frontend Development
+
 --------------------------------------
