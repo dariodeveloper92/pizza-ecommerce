@@ -51,9 +51,14 @@ The project utilizes Apache Kafka to maintain eventual consistency across the di
 
 --------------------------------------
 📂 Infrastructure & Dockerization
-The entire infrastructure is orchestrated via Docker, ensuring a "plug-and-play" environment for developers. Each service owns its dedicated schema to prevent tight coupling:
 
+The entire infrastructure is orchestrated via Docker, ensuring a "plug-and-play" environment for developers. Each service owns its dedicated schema to prevent tight coupling.
+
+Data Persistence:
+
+The system utilizes Docker Volumes to map internal MySQL data to the local directory ./mysql_data. This ensures that your databases (users, products, notifications) are preserved even if containers are destroyed or updated.
 Service	Database Instance	External Port
+
 User	pizza_user_db	3309
 Product	pizza_product_db	3307
 Cart	pizza_cart_db	3308
@@ -71,17 +76,27 @@ Prerequisites:
 Setup & Run:
 1. Clone the repository:
 - git clone https://github.com/your-username/pizza-ecommerce.git
+- 
 2. Spin up the Infrastructure (DBs & Kafka):
-
-From the project root, run:
+  From the project root, run:
 - docker-compose up -d
 
-3. Application Configuration:
-   Each microservice is pre-configured to connect to the Docker instances. Update 'application.properties' only if you wish to change local port mappings.
+  Note: This will automatically create a ./mysql_data folder to persist your data.
+
+3. Build & Launch:
+
+Run (in the root (or in each service folder)):
 - mvn clean install
 
-4. Launch Services:
-- Start the services in the following order: User, Product, Cart, Notification, and finally the Gateway.
+Start services in order: User, Product, Cart, Notification, and finally the Gateway.
+
+4. Stopping the System:
+
+Use (to pause the infrastructure (keeps data and containers)):
+- docker-compose stop
+
+Use (to remove containers (keeps data safe in volumes)):
+- docker-compose down
 
 --------------------------------------
 
