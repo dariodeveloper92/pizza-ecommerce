@@ -10,6 +10,9 @@ services:
       MYSQL_ROOT_PASSWORD: root
     ports:
       - "3309:3306"
+    volumes:
+      # Questa riga dice: salva i dati di MySQL nella cartella locale ./mysql_data/user
+      - ./mysql_data/user:/var/lib/mysql
     networks:
       - pizza-net
 
@@ -22,6 +25,9 @@ services:
       MYSQL_ROOT_PASSWORD: root
     ports:
       - "3307:3306" # Mappato su 3307 per evitare conflitti se hai già un MySQL locale
+    volumes:
+      # Questa riga dice: salva i dati di MySQL nella cartella locale ./mysql_data/product
+      - ./mysql_data/product:/var/lib/mysql
     networks:
       - pizza-net
 
@@ -34,6 +40,9 @@ services:
       MYSQL_ROOT_PASSWORD: root
     ports:
       - "3308:3306" # Mappato su 3308
+    volumes:
+      # Questa riga dice: salva i dati di MySQL nella cartella locale ./mysql_data/cart
+      - ./mysql_data/cart:/var/lib/mysql
     networks:
       - pizza-net
 
@@ -46,6 +55,9 @@ services:
       MYSQL_ROOT_PASSWORD: root
     ports:
       - "3310:3306" # Usiamo la porta 3310
+    volumes:
+      # Questa riga dice: salva i dati di MySQL nella cartella locale ./mysql_data/notification
+      - ./mysql_data/notification:/var/lib/mysql
     networks:
       - pizza-net
 
